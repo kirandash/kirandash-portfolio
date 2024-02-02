@@ -1,41 +1,43 @@
-import Link from "next/link";
-import React from "react";
-import { allProjects } from "contentlayer/generated";
-import { Navigation } from "../components/nav";
-import { Card } from "../components/card";
-import { Article } from "./article";
-import { Redis } from "@upstash/redis";
-import { Eye } from "lucide-react";
+import Link from 'next/link'
+import React from 'react'
+import { allProjects } from 'contentlayer/generated'
+import { Navigation } from '../components/nav'
+import { Card } from '../components/card'
+import { Article } from './article'
+import { Redis } from '@upstash/redis'
+import { Eye } from 'lucide-react'
 
-const redis = Redis.fromEnv();
+const redis = Redis.fromEnv()
 
-export const revalidate = 60;
+export const revalidate = 60
 export default async function ProjectsPage() {
   const views = (
     await redis.mget<number[]>(
-      ...allProjects.map((p) => ["pageviews", "projects", p.slug].join(":")),
+      ...allProjects.map((p) => ['pageviews', 'projects', p.slug].join(':'))
     )
   ).reduce((acc, v, i) => {
-    acc[allProjects[i].slug] = v ?? 0;
-    return acc;
-  }, {} as Record<string, number>);
+    acc[allProjects[i].slug] = v ?? 0
+    return acc
+  }, {} as Record<string, number>)
 
-  const featured = allProjects.find((project) => project.slug === "unkey")!;
-  const top2 = allProjects.find((project) => project.slug === "planetfall")!;
-  const top3 = allProjects.find((project) => project.slug === "highstorm")!;
+  const featured = allProjects.find(
+    (project) => project.slug === 'liquidityone'
+  )!
+  const top2 = allProjects.find((project) => project.slug === 'finxflo')!
+  const top3 = allProjects.find((project) => project.slug === 'truuue')!
   const sorted = allProjects
     .filter((p) => p.published)
     .filter(
       (project) =>
         project.slug !== featured.slug &&
         project.slug !== top2.slug &&
-        project.slug !== top3.slug,
+        project.slug !== top3.slug
     )
     .sort(
       (a, b) =>
         new Date(b.date ?? Number.POSITIVE_INFINITY).getTime() -
-        new Date(a.date ?? Number.POSITIVE_INFINITY).getTime(),
-    );
+        new Date(a.date ?? Number.POSITIVE_INFINITY).getTime()
+    )
 
   return (
     <div className="relative pb-16">
@@ -60,7 +62,7 @@ export default async function ProjectsPage() {
                     {featured.date ? (
                       <time dateTime={new Date(featured.date).toISOString()}>
                         {Intl.DateTimeFormat(undefined, {
-                          dateStyle: "medium",
+                          dateStyle: 'medium',
                         }).format(new Date(featured.date))}
                       </time>
                     ) : (
@@ -68,9 +70,9 @@ export default async function ProjectsPage() {
                     )}
                   </div>
                   <span className="flex items-center gap-1 text-xs text-zinc-500">
-                    <Eye className="w-4 h-4" />{" "}
-                    {Intl.NumberFormat("en-US", { notation: "compact" }).format(
-                      views[featured.slug] ?? 0,
+                    <Eye className="w-4 h-4" />{' '}
+                    {Intl.NumberFormat('en-US', { notation: 'compact' }).format(
+                      views[featured.slug] ?? 0
                     )}
                   </span>
                 </div>
@@ -134,5 +136,5 @@ export default async function ProjectsPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
